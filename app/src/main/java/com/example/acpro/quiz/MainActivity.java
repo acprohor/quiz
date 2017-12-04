@@ -1,12 +1,20 @@
 package com.example.acpro.quiz;
 
+import android.content.ClipData;
+import android.content.ContentValues;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.AssetManager;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v4.app.Fragment;
@@ -24,21 +32,55 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.IgnoreExtraProperties;
+import com.google.firebase.database.Query;
+
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    FirebaseDatabase database;
+    static DatabaseReference myRef;
+
     static boolean selectedState[] = new boolean[6]; // состояние вопроса. отвечен или нет.
     static boolean rightAnswerState[] = new boolean[6]; // верно ли отвечен вопрос.
     static int selectedButtonNum[] = new int[6]; // номер кнопки с правильным ответом
-    //static int imageNames[] = new int[6];
-    int mas[] = new int[6];
-    //static List<Integer> test = Arrays.asList(R.drawable.moon_shard, R.drawable.one, R.drawable.two, R.drawable.three);
-    static List<String> imageNames = Arrays.asList("one.jpg","two.jpg","three.jpg","four.jpg","clock_ability3.jpg","abaddona_ability4.jpg",
+    static TabLayout tabLayout;
+    static AlertDialog.Builder builder;
+    static Intent intentRes;
+    static List<String> imageNames = Arrays.asList("one.jpg", "one.jpg","two.jpg","three.jpg","four.jpg","clock_ability3.jpg","abaddona_ability4.jpg",
             "chaos_ability1");
+
+    static String userName = "unknownPlayer";
+    static int score = 0;
+    static int progress = 0;
+
+    static DBHelper dbHelper;
+
+
+    @IgnoreExtraProperties
+    static class Item implements Serializable{
+        public String name;
+        public int sc;
+
+        public Item(){
+        }
+
+        Item(String name, int sc){
+            this.name = userName;
+            this.sc = score;
+        }
+
+
+    }
+
 
 
 
@@ -64,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("items");
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -72,17 +117,54 @@ public class MainActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
+        tabLayout = findViewById(R.id.tabLayout);
+        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
+        Intent intent = getIntent();
+        userName = intent.getExtras().getString("userName");
+        int level = intent.getExtras().getInt("level");
+        String nameOfAbilities[] = intent.getExtras().getStringArray("abilities");
+        System.out.println("LEVEL IS " + level);
+
+        try {
+            for (String nameOfAbility : nameOfAbilities) {
+                System.out.println(nameOfAbility);
             }
-        });
+        }catch (NullPointerException e){
+            System.out.println("the array is empty ");
+        }
+
 
         quizCreator1.createQuizArray();
         quizCreator1.createNewSomething();
+        //quizCreator1.createQuery();
+        //quizCreator1.showList();
+
+        //quizCreator1.getSkills();
+
+
+        dbHelper = new DBHelper(this);
+
+
+        builder = new AlertDialog.Builder(this);
+        intentRes = new Intent(MainActivity.this,ResultsActivity.class);
+
+        // clear all massifs and counters
+        for (int i=0; i<selectedState.length; i++) {
+            selectedState[i] = false;
+        }
+        for (int i=0; i<rightAnswerState.length; i++){
+            rightAnswerState[i] = false;
+        }
+        for (int i=0;i<selectedButtonNum.length;i++ ){
+            selectedButtonNum[i] = 0;
+        }
+        score = 0;
+        progress = 0;
+
+
     }
 
 
@@ -159,9 +241,16 @@ public class MainActivity extends AppCompatActivity {
                 allButtons[i] = (Button) rootView.findViewById(answerButtons.get(i));
             }
 
+            Button button5 = rootView.findViewById(R.id.button11);
+            Button button6 = rootView.findViewById(R.id.button12);
+
+            button5.setVisibility(View.GONE);
+            button6.setVisibility(View.GONE);
+
+
             // Set Choices.
             for (int i = 0; i <4; i++){
-                allButtons[i].setText(anotherNewQuiz.get(i+2));
+                allButtons[i].setText(anotherNewQuiz.get(i+2)); // +2 потому что первые 2 элемента заняты правильным ответом и вопросом
             }
 
             if (selectedState[getArguments().getInt(ARG_SECTION_NUMBER)]){
@@ -191,7 +280,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            textView1.setText(anotherQuestion);
+            //textView1.setText(anotherQuestion);
+            textView1.setText(userName);
             //imageView.setImageDrawable(Drawable.createFromPath("C:\\Users\\acpro\\AndroidStudioProjects\\quiz\\app\\src\\main\\res\\drawable\\moon_shard.jpg"));
             //imageView.setImageDrawable(getResources().getDrawable(R.drawable.moon_shard));
             //imageView.setImageDrawable(getResources().getDrawable(test.get(getArguments().getInt(ARG_SECTION_NUMBER))));
@@ -216,6 +306,10 @@ public class MainActivity extends AppCompatActivity {
                         if (button.getText().equals(anotherRightAnswer)) {
                             button.getBackground().setColorFilter(Color.parseColor("#4CAF50"), PorterDuff.Mode.MULTIPLY);
                             textView1.setText("Nice, good job");
+                            tabLayout.getTabAt(getArguments().getInt(ARG_SECTION_NUMBER)-1).setIcon(R.drawable.ic_yes);
+                            tabLayout.getTabAt(getArguments().getInt(ARG_SECTION_NUMBER)-1).setText("");
+                            score+= 10;
+                            progress++;
                             for (Button button1:allButtons){
                                 button1.setEnabled(false);
                             }
@@ -224,6 +318,9 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             button.getBackground().setColorFilter(Color.parseColor("#F44336"), PorterDuff.Mode.MULTIPLY);
                             textView1.setText("No :( Right answer is " + anotherRightAnswer);
+                            tabLayout.getTabAt(getArguments().getInt(ARG_SECTION_NUMBER)-1).setIcon(R.drawable.ic_no);
+                            tabLayout.getTabAt(getArguments().getInt(ARG_SECTION_NUMBER)-1).setText("");
+                            progress++;
                             for (Button button1:allButtons){
                                 button1.setEnabled(false);
                             }
@@ -235,12 +332,52 @@ public class MainActivity extends AppCompatActivity {
                             rightAnswerState[getArguments().getInt(ARG_SECTION_NUMBER)] = false;
                             selectedButtonNum[getArguments().getInt(ARG_SECTION_NUMBER)] = finalI; //  переписать чтобы использовалось один раз вне оператора if
                         }
+                        if (progress > 4) {
+                            // Create dialog.
+                            builder.setTitle("results");
+                            builder.setMessage("Player " + userName +"\n\n" + "score: " + score );
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    /*SQLiteDatabase database = dbHelper.getWritableDatabase();
 
+                                    ContentValues contentValues = new ContentValues(); // для добавления новых строк в таблицу.
+
+                                    contentValues.put(DBHelper.KEY_NAME, userName);
+                                    contentValues.put(DBHelper.KEY_SCORE, score);
+
+                                    database.insert(DBHelper.TABLE_CONTACTS, null, contentValues);*/
+
+                                    Query getScoreFromDB = myRef.orderByChild("score");
+
+                                    ItemModel itemModel = new ItemModel(userName, score);
+                                    myRef.push().setValue(itemModel);
+                                }
+                            });
+                            builder.setNeutralButton("Show table", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    SQLiteDatabase database = dbHelper.getWritableDatabase();
+
+                                    ContentValues contentValues = new ContentValues(); // для добавления новых строк в таблиуц.
+
+                                    contentValues.put(DBHelper.KEY_NAME, userName);
+                                    contentValues.put(DBHelper.KEY_SCORE, score);
+
+                                    database.insert(DBHelper.TABLE_CONTACTS, null, contentValues);
+
+                                    startActivity(intentRes);
+                                }
+                        });
+                            builder.setCancelable(false);
+                            builder.show();
+                        }
                     }
                 });
             }
 
             textView.setText(anotherRightAnswer);
+            dbHelper.close();
             return rootView;
         }
     }
