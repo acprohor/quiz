@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ResultsActivity extends AppCompatActivity {
-    static DBHelper dbHelper;
 
     static List<ItemModel> list;
 
@@ -55,7 +54,6 @@ public class ResultsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_results);
-        dbHelper = new DBHelper(this);
 
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("items");
@@ -118,37 +116,7 @@ public class ResultsActivity extends AppCompatActivity {
         buttonShowTable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                ItemModel itemModel = new ItemModel("itemName", 11);
-                myRef.push().setValue(itemModel);
-
-                /*Item item = new Item("newName", 22);
-                myRef.push().setValue(item);*/
-
-
-
-                /*SQLiteDatabase database = dbHelper.getWritableDatabase();
-
-                Cursor cursor = database.query(DBHelper.TABLE_CONTACTS, null, null, null, null, null, null);
-
-                if (cursor.moveToFirst()){
-                    int idIndex = cursor.getColumnIndex(DBHelper.KEY_ID);
-                    int nameIndex = cursor.getColumnIndex(DBHelper.KEY_NAME);
-                    int scoreIndex = cursor.getColumnIndex(DBHelper.KEY_SCORE);
-                    System.out.println(idIndex + " \n" + nameIndex + " \n" + scoreIndex);
-                    do {
-                        Log.d("mLog",
-                        ", name = " + cursor.getString(nameIndex) +
-                        ", email = " + cursor.getString(scoreIndex));
-                    }while (cursor.moveToNext());
-                }else {
-                    Log.d("mLog","0 rows");
-                }
-
-                adapter.addAll("1","2","3");
-
-                cursor.close();*/
-
+                
             }
         });
 
@@ -156,8 +124,6 @@ public class ResultsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                /*SQLiteDatabase database = dbHelper.getWritableDatabase();
-                database.delete(DBHelper.TABLE_CONTACTS, null, null);*/
             }
         });
 
@@ -169,14 +135,10 @@ public class ResultsActivity extends AppCompatActivity {
             }
         });
 
-        dbHelper.close();
     }
 
     private List<ItemModel> initData(){
         list = new ArrayList<ItemModel>();
-
-        //list.add(new ItemModel("user name", 0));
-
         return list;
     }
 

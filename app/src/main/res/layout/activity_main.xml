@@ -67,6 +67,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="8" />
+
+        <android.support.design.widget.TabItem
+            android:id="@+id/tabItem9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="9" />
+
+        <android.support.design.widget.TabItem
+            android:id="@+id/tabItem10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10" />
     </android.support.design.widget.TabLayout>
 
     <android.support.v4.view.ViewPager

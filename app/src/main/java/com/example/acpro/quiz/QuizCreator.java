@@ -1,6 +1,7 @@
 package com.example.acpro.quiz;
 
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class QuizCreator {
@@ -81,21 +83,17 @@ public class QuizCreator {
         });
 
     }
-    String temp[] = new String[10];
+    String temp[] = new String[11];
 
     String[] getSkills(Button button){
-        final boolean[] test = {false};
         final String myMas[] = new String[7];
         for (int a = 0; a < 7; a++) {
             final int finalA = a;
             myRef.child(String.valueOf(a)).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    temp[finalA] = String.valueOf(dataSnapshot.getValue(String.class));
-                    myMas[finalA] = String.valueOf(dataSnapshot.getValue(String.class));
-                    if (finalA == 6){
-                        test[0] = true;
-                    }
+                    //temp[finalA] = String.valueOf(dataSnapshot.getValue(String.class));
+                    //myMas[finalA] = String.valueOf(dataSnapshot.getValue(String.class));
                 }
 
                 @Override
@@ -105,11 +103,28 @@ public class QuizCreator {
             });
         }
 
-        ready = true;
-        button.setEnabled(false);
-        if (test[0])return myMas;
-        else
-        return null;
+        return myMas;
+    }
+
+    void setSkillsOnButton(final Button[] buttons){
+        final String myMas[] = new String[7];
+
+        for (int a = 1; a < 4; a++) {
+            final int finalA = a;
+            myRef.child(String.valueOf(a)).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    //buttons[finalA].setText(String.valueOf(dataSnapshot.getValue(String.class)));
+                    buttons[finalA].setText(String.valueOf(dataSnapshot.getValue(String.class)));
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    System.out.println("ERROR to read ");
+                }
+            });
+        }
+
     }
 
     void showSkills(){
@@ -158,4 +173,104 @@ public class QuizCreator {
         }
 
     }
+
+    private int mixedButtonsNum[][];
+
+    private int quizIdArray[][] = new int[11][6];
+
+    void createIdArray(int level){
+        Random random = new Random();
+
+        mixedButtonsNum = new int[11][level];
+
+        for (int a = 0; a < 11; a++) {      // создание матрицы распределения кнопок
+            for (int i = 0; i < level; i++) {
+                mixedButtonsNum[a][i] = random.nextInt(level);
+                if (i > 0) {
+                    for (int j = i - 1; j >= 0; j--) {
+                        while (mixedButtonsNum[a][i] == mixedButtonsNum[a][j]) {
+                            mixedButtonsNum[a][i] = random.nextInt(level);
+                            j = i - 1;
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("Матрица с ID кнопок ");
+        for (int i=0; i < 11; i++){
+            for (int j =0 ; j<level;j++){
+                System.out.print(mixedButtonsNum[i][j] + " ");
+            }
+            System.out.println("-----");
+        }
+
+        int randomSkillsNum[] = new int[11];        // 10 случайных способностей которые нужно отгадать
+        for (int i = 0; i < randomSkillsNum.length; i++){
+            randomSkillsNum[i] = random.nextInt(115);
+            if (i > 0 ) {
+                for (int j = i-1; j >= 0; j--) {
+                    while (randomSkillsNum[i] == randomSkillsNum[j]) {
+                        randomSkillsNum[i] = random.nextInt(115);
+                        j = i-1;
+                    }
+                }
+            }
+        }
+
+
+        for (int i = 0; i < 11; i++) {          // записываются в первые элементы матрицы
+            quizIdArray[i][0] = randomSkillsNum[i];
+        }
+
+        for (int i = 0; i < 11; i++){           // создание остальной матрицы
+            for (int j = 1; j < 6; j++){
+                quizIdArray[i][j] = random.nextInt(115);
+                for (int k = j-1; k >= 0; k--){
+                    while (quizIdArray[i][j] == quizIdArray[i][k]){
+                        quizIdArray[i][j] = random.nextInt(115);
+                        k = j-1;
+                    }
+                }
+            }
+        }
+    }
+    private String rightRightAnswer = "netotveta";
+    String fillButtons(final Button[] buttons, final TextView textView, int secNum, int level){
+
+        final int [][] innerMixedButtonsNum = mixedButtonsNum;
+
+        final int sN = secNum;
+
+        myRef.child(String.valueOf(quizIdArray[sN][0])).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //rightRightAnswer = sN + " " + "0" + String.valueOf(dataSnapshot.getValue(String.class)) + " " + quizIdArray[sN][0];
+                textView.setText(sN + " " + "0" + String.valueOf(dataSnapshot.getValue(String.class)) + " " + quizIdArray[sN][0]);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        for (int i = 0; i < level; i++){
+            final int finalI = i;
+            myRef.child(String.valueOf(quizIdArray[sN][finalI])).addValueEventListener(new ValueEventListener() {
+                                                                                      @Override
+                                                                                      public void onDataChange(DataSnapshot dataSnapshot) {
+                                                                                          buttons[mixedButtonsNum[sN][finalI]].setText(sN + " " + finalI + String.valueOf(dataSnapshot.getValue(String.class)) + " " + quizIdArray[sN][finalI]);
+                                                                                      }
+
+                                                                                      @Override
+                                                                                      public void onCancelled(DatabaseError databaseError) {
+                                                                                          System.out.println("connection failed");
+                                                                                      }
+                                                                                  });
+
+        }
+
+        return rightRightAnswer;
+    }
+
 }
