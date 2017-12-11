@@ -42,12 +42,11 @@ public class MainActivity extends AppCompatActivity {
     static boolean rightAnswerState[] = new boolean[11]; // верно ли отвечен вопрос.
     static int selectedButtonNum[] = new int[11]; // номер кнопки с правильным ответом.
     static int rightAnswerNotSelected[] = new int[11]; // номер кнопки с правильным ответом при неверном ответе.
-    static boolean deletedButtons[][] = new boolean[11][6]; // номер удалённой кнопки.
-    static boolean hintUsed[] = new boolean[11]; //использована ли подсказка.
     static TabLayout tabLayout;
     static AlertDialog.Builder builder;
     static Intent intentRes;
     static Intent intentStart;
+    static String userID;
 
     static String userName = "unknownPlayer";
     static int score = 0;
@@ -89,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setOffscreenPageLimit(10);
 
 
         tabLayout = findViewById(R.id.tabLayout);
@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         userName = intent.getExtras().getString("userName");
         int level = intent.getExtras().getInt("level");
+        userID = intent.getExtras().getString("userId");
 
         switch (level){
             case 0: numberOfButtons = 2;
@@ -265,19 +266,7 @@ public class MainActivity extends AppCompatActivity {
 */
 
 
-            if (selectedState[getArguments().getInt(ARG_SECTION_NUMBER)]){
-                for (int i=0;i<numberOfButtons;i++){
-                    allButtons[i].setEnabled(false);
-                }
 
-                if (rightAnswerState[getArguments().getInt(ARG_SECTION_NUMBER)]){
-                    allButtons[selectedButtonNum[getArguments().getInt(ARG_SECTION_NUMBER)]].getBackground().setColorFilter(Color.parseColor("#4CAF50"), PorterDuff.Mode.MULTIPLY);
-                }
-                else {
-                    allButtons[selectedButtonNum[getArguments().getInt(ARG_SECTION_NUMBER)]].getBackground().setColorFilter(Color.parseColor("#F44336"), PorterDuff.Mode.MULTIPLY);
-                    allButtons[rightAnswerNotSelected[getArguments().getInt(ARG_SECTION_NUMBER)]].getBackground().setColorFilter(Color.parseColor("#4CAF50"), PorterDuff.Mode.MULTIPLY);
-                }
-            }
 
             for (int i = 0; i < numberOfButtons; i++) {
                 final Button button = allButtons[i];
@@ -318,26 +307,27 @@ public class MainActivity extends AppCompatActivity {
                             selectedButtonNum[getArguments().getInt(ARG_SECTION_NUMBER)] = finalI;
                         }
                         if (progress > 9) {
+                            if (userID == null) {
+                                if (!userName.equals("")) {
+                                    ItemModel itemModel = new ItemModel(userName, score);
+                                    myRef.push().setValue(itemModel);
+                                }
+                            } else {
+                                myRef.child(userID).child("score").setValue(score);
+                            }
+
                             // Create dialog.
                             builder.setTitle("results");
                             builder.setMessage("Player " + userName +"\n\n" + "score: " + score );
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    if (!userName.equals("")) {
-                                        ItemModel itemModel = new ItemModel(userName, score);
-                                        myRef.push().setValue(itemModel);
-                                    }
                                     startActivity(intentStart);
                                 }
                             });
                             builder.setNeutralButton("Show table", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    if (!userName.equals("")) {
-                                        ItemModel itemModel = new ItemModel(userName, score);
-                                        myRef.push().setValue(itemModel);
-                                    }
                                     startActivity(intentRes);
                                 }
                         });

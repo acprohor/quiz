@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/AppTheme.NoActionBar"
     android:background="@drawable/wallpaper"
+    android:theme="@style/AppTheme.NoActionBar"
     tools:context="com.example.acpro.quiz.StartActivity">
 
     <TextView
@@ -27,6 +27,8 @@
         android:layout_marginBottom="170dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:backgroundTint="@color/colorAccent"
+        android:enabled="false"
         android:text="@string/B_start_game"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -43,7 +45,7 @@
         android:ems="10"
         android:hint="Name"
         android:inputType="textPersonName"
-        android:textColor="@color/red"
+        android:textColor="@color/colorAccent"
         app:layout_constraintBottom_toTopOf="@+id/button5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -56,6 +58,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
+        android:backgroundTint="@color/colorAccent"
         android:text="@string/B_show_results"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -69,6 +72,7 @@
         android:layout_marginStart="8dp"
         android:max="2"
         android:progress="1"
+        android:progressBackgroundTint="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button9"
         app:layout_constraintStart_toStartOf="parent" />
@@ -81,9 +85,33 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:text="@string/difficult_message"
-        android:textColor="@color/red"
+        android:textColor="@color/colorAccent"
         app:layout_constraintBottom_toTopOf="@+id/seekBar"
         app:layout_constraintEnd_toStartOf="@+id/button9"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/signInButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/button9"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/button6"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:backgroundTint="@color/colorAccent"
+        android:onClick="onClickExitButton"
+        android:text="exit"
+        android:textColorLink="@color/common_google_signin_btn_text_dark_default"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/signInButton"
+        app:layout_constraintEnd_toEndOf="@+id/signInButton"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/signInButton"
+        app:layout_constraintTop_toTopOf="@+id/signInButton"
+        app:layout_constraintVertical_bias="0.0" />
 
 </android.support.constraint.ConstraintLayout>
