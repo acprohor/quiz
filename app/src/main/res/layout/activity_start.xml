@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/AppTheme.NoActionBar"
+    android:background="@drawable/wallpaper"
     tools:context="com.example.acpro.quiz.StartActivity">
 
     <TextView
@@ -14,7 +15,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="32dp"
-        android:text="Hola, please enter your name"
+        android:text="@string/start_message"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,10 +24,10 @@
         android:id="@+id/button5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="170dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="Start game"
+        android:text="@string/B_start_game"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -40,12 +41,14 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:ems="10"
+        android:hint="Name"
         android:inputType="textPersonName"
-        android:text="Name"
+        android:textColor="@color/red"
         app:layout_constraintBottom_toTopOf="@+id/button5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="LabelFor" />
 
     <Button
         android:id="@+id/button9"
@@ -53,7 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:text="show results"
+        android:text="@string/B_show_results"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -77,19 +80,10 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="choose the difficulty level"
+        android:text="@string/difficult_message"
+        android:textColor="@color/red"
         app:layout_constraintBottom_toTopOf="@+id/seekBar"
         app:layout_constraintEnd_toStartOf="@+id/button9"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/button10"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button5" />
 
 </android.support.constraint.ConstraintLayout>

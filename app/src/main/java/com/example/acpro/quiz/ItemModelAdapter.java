@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.io.Serializable;
+import java.util.Comparator;
 import java.util.List;
 
 public class ItemModelAdapter extends BaseAdapter{

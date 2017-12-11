@@ -1,18 +1,10 @@
 package com.example.acpro.quiz;
 
-import android.content.ClipData;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.AssetManager;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -32,15 +24,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.IgnoreExtraProperties;
-import com.google.firebase.database.Query;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -48,16 +36,18 @@ public class MainActivity extends AppCompatActivity {
 
     FirebaseDatabase database;
     static DatabaseReference myRef;
+    private static StorageReference storageReference;
 
     static boolean selectedState[] = new boolean[11]; // состояние вопроса. отвечен или нет.
     static boolean rightAnswerState[] = new boolean[11]; // верно ли отвечен вопрос.
     static int selectedButtonNum[] = new int[11]; // номер кнопки с правильным ответом.
-    static int rightAnswerNotSelected[] = new int[11]; // номе кнопки с правильным ответом при неверном ответе.
+    static int rightAnswerNotSelected[] = new int[11]; // номер кнопки с правильным ответом при неверном ответе.
+    static boolean deletedButtons[][] = new boolean[11][6]; // номер удалённой кнопки.
+    static boolean hintUsed[] = new boolean[11]; //использована ли подсказка.
     static TabLayout tabLayout;
     static AlertDialog.Builder builder;
     static Intent intentRes;
-    static List<String> imageNames = Arrays.asList("one.jpg", "one.jpg","two.jpg","three.jpg","four.jpg","clock_ability3.jpg","abaddona_ability4.jpg",
-            "chaos_ability1.jpg",  "chaos_ability1.jpg",  "chaos_ability1.jpg",  "chaos_ability1.jpg",  "chaos_ability1.jpg" );
+    static Intent intentStart;
 
     static String userName = "unknownPlayer";
     static int score = 0;
@@ -65,26 +55,6 @@ public class MainActivity extends AppCompatActivity {
     static int progress = 0;
 
     static int numberOfButtons;
-
-    /*
-    @IgnoreExtraProperties
-    static class Item implements Serializable{
-        public String name;
-        public int sc;
-
-        public Item(){
-        }
-
-        Item(String name, int sc){
-            this.name = userName;
-            this.sc = score;
-        }
-
-
-    }
-
-*/
-
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -109,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         database = FirebaseDatabase.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference();
         myRef = database.getReference("items");
 
         // Create the adapter that will return a fragment for each of the three
@@ -128,9 +99,6 @@ public class MainActivity extends AppCompatActivity {
         userName = intent.getExtras().getString("userName");
         int level = intent.getExtras().getInt("level");
 
-
-        String nameOfAbilities[] = intent.getExtras().getStringArray("abilities");
-
         switch (level){
             case 0: numberOfButtons = 2;
             factor = 1;
@@ -143,27 +111,11 @@ public class MainActivity extends AppCompatActivity {
             break;
         }
 
-        /*try {
-            for (String nameOfAbility : nameOfAbilities) {
-                System.out.println(nameOfAbility);
-            }
-        }catch (NullPointerException e){
-            System.out.println("the array is empty ");
-        }*/
-
-
-        quizCreator1.createQuizArray();
-        quizCreator1.createNewSomething();
-        //quizCreator1.createQuery();
-        //quizCreator1.showList();
-
-        //quizCreator1.getSkills();
-
         quizCreator1.createIdArray(numberOfButtons);
-
 
         builder = new AlertDialog.Builder(this);
         intentRes = new Intent(MainActivity.this,ResultsActivity.class);
+        intentStart = new Intent(MainActivity.this,StartActivity.class);
 
         // clear all massifs and counters
         for (int i=0; i<selectedState.length; i++) {
@@ -177,8 +129,6 @@ public class MainActivity extends AppCompatActivity {
         }
         score = 0;
         progress = 0;
-
-
     }
 
 
@@ -225,28 +175,21 @@ public class MainActivity extends AppCompatActivity {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            //args.putli
             fragment.setArguments(args);
             return fragment;
         }
 
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+        public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             final TextView textView = (TextView) rootView.findViewById(R.id.section_label);
             final TextView textView1 = (TextView) rootView.findViewById(R.id.textView);
             ImageView imageView = (ImageView) rootView.findViewById(R.id.imageView);
+            final FloatingActionButton hintFragmentButton = rootView.findViewById(R.id.floatingActionButton2);
 
-            //String anotherRightAnswer = "nothing";
-            String anotherQuestion = "not nothing";
 
-            ArrayList<String> anotherNewQuiz = new ArrayList<>();
-     //       anotherNewQuiz = quizCreator1.quizArray.get(getArguments().getInt(ARG_SECTION_NUMBER));
-     //       anotherQuestion = anotherNewQuiz.get(0);
-     //       final String anotherRightAnswer = anotherNewQuiz.get(1);
-            final String choose;
             final List<Integer> answerButtons = Arrays.asList(R.id.button, R.id.button2, R.id.button3, R.id.button4, R.id.button11, R.id.button12);
 
             final Button allButtons[] = new Button[6];
@@ -269,69 +212,73 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
 
-            //Button button5 = rootView.findViewById(R.id.button11);
-            //Button button6 = rootView.findViewById(R.id.button12);
+            textView.setVisibility(View.INVISIBLE);
+            hintFragmentButton.setVisibility(View.GONE);
 
-            //button5.setVisibility(View.GONE);
-            //button6.setVisibility(View.GONE);
+            final int section = getArguments().getInt(ARG_SECTION_NUMBER);
 
-            //textView.setVisibility(View.INVISIBLE);
+            quizCreator1.fillButtons(allButtons, textView, imageView, section, numberOfButtons, getContext());
 
-            int section = getArguments().getInt(ARG_SECTION_NUMBER);
-            String nRA;
-            nRA = quizCreator1.fillButtons(allButtons, textView, section, numberOfButtons);
+/*
 
-            // Set Choices.
-            /*for (int i = 0; i <4; i++){
-                allButtons[i].setText(anotherNewQuiz.get(i+2)); // +2 потому что первые 2 элемента заняты правильным ответом и вопросом
-            }*/
+            hintFragmentButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    hintUsed[getArguments().getInt(ARG_SECTION_NUMBER)] = true;
+                    Random random = new Random();
+                    int ch = numberOfButtons/2;
+                    System.out.println("счётчик до входа в цикл" + ch);
+                    int mas[] = new int[6];
+                    for (int i =0; i<mas.length; i++){
+                        mas[i] = -1;
+                    }
+                    for (int i=0; i<numberOfButtons; i++){
+                        int a = random.nextInt(numberOfButtons);
+                        for (int j = 0; j<mas.length; j++){
+                            while (a == mas[j]){
+                                a = random.nextInt(numberOfButtons);
+                            }
+                        }
+                        if (!allButtons[a].getText().equals(textView.getText())){
+                            allButtons[a].setVisibility(View.GONE);
+                            deletedButtons[getArguments().getInt(ARG_SECTION_NUMBER)][a] = true;
+                            mas[i] = a;
+                            ch--;
+                            System.out.println("удалили кнопку " + a + " уменьшили счётчик " + ch);
+                        }
+                        if (ch <= 0){
+                            hintFragmentButton.setVisibility(View.GONE);
+                            System.out.println("Удилили все. Выход из цикла");
+                            break;
+                        }
+                    }
+                }
+            });
+
+            if (hintUsed[getArguments().getInt(ARG_SECTION_NUMBER)]){
+                for (int i = 0; i < numberOfButtons; i++){
+                    if (deletedButtons[section][i]){
+                        allButtons[i].setVisibility(View.GONE);
+                    }
+                }
+            }
+*/
+
 
             if (selectedState[getArguments().getInt(ARG_SECTION_NUMBER)]){
-                System.out.println("На этот вопрос уже был дан ответ.");
                 for (int i=0;i<numberOfButtons;i++){
                     allButtons[i].setEnabled(false);
                 }
 
-                System.out.println("Выключили кнопки");
                 if (rightAnswerState[getArguments().getInt(ARG_SECTION_NUMBER)]){
-                    System.out.println("Ответ был дан верный, значит выделяем его зелёным.");
                     allButtons[selectedButtonNum[getArguments().getInt(ARG_SECTION_NUMBER)]].getBackground().setColorFilter(Color.parseColor("#4CAF50"), PorterDuff.Mode.MULTIPLY);
                 }
                 else {
-                    System.out.println("Ответ был дан не верно, выделяем красным вариант, и правильный ответ");
                     allButtons[selectedButtonNum[getArguments().getInt(ARG_SECTION_NUMBER)]].getBackground().setColorFilter(Color.parseColor("#F44336"), PorterDuff.Mode.MULTIPLY);
-                    System.out.println("Начинаем искать правильный ответ.");
                     allButtons[rightAnswerNotSelected[getArguments().getInt(ARG_SECTION_NUMBER)]].getBackground().setColorFilter(Color.parseColor("#4CAF50"), PorterDuff.Mode.MULTIPLY);
-                    /*for (int j=0;j<numberOfButtons;j++){
-                        System.out.println("Текст из кнопки: " + allButtons[j].getText() + " сравним с правильным ответом: " + textView.getText());
-                        Button buttonTemp = allButtons[j];
-                        if (buttonTemp.getText().equals(textView.getText())){
-                            System.out.println("Нашли кнопку с правильным ответом, выделим её зелёным.");
-                            allButtons[j].getBackground().setColorFilter(Color.parseColor("#4CAF50"), PorterDuff.Mode.MULTIPLY);
-                            break;
-                        }
-                    }
-                    */
                 }
             }
 
-
-            //textView1.setText(userName);
-
-            //imageView.setImageDrawable(Drawable.createFromPath("C:\\Users\\acpro\\AndroidStudioProjects\\quiz\\app\\src\\main\\res\\drawable\\moon_shard.jpg"));
-            //imageView.setImageDrawable(getResources().getDrawable(R.drawable.moon_shard));
-            //imageView.setImageDrawable(getResources().getDrawable(test.get(getArguments().getInt(ARG_SECTION_NUMBER))));
-            //imageView.setImageResource(R.drawable.);
-
-            AssetManager assets = getActivity().getAssets();
-            String answerStringOfPath = imageNames.get(getArguments().getInt(ARG_SECTION_NUMBER));
-            try {
-                imageView.setImageDrawable(Drawable.createFromStream(assets.open(answerStringOfPath), ""));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-/**/
             for (int i = 0; i < numberOfButtons; i++) {
                 final Button button = allButtons[i];
                 final int finalI = i;
@@ -353,11 +300,11 @@ public class MainActivity extends AppCompatActivity {
                             selectedButtonNum[getArguments().getInt(ARG_SECTION_NUMBER)] = finalI;
                         } else {
                             button.getBackground().setColorFilter(Color.parseColor("#F44336"), PorterDuff.Mode.MULTIPLY);
-                            textView1.setText("No :( Right answer is " + textView.getText());
+                            textView1.setText("wrong");
                             tabLayout.getTabAt(getArguments().getInt(ARG_SECTION_NUMBER)-1).setIcon(R.drawable.ic_no);
                             tabLayout.getTabAt(getArguments().getInt(ARG_SECTION_NUMBER)-1).setText("");
                             progress++;
-                            for (Button button1:allButtons){        // соеденить два цикла. этот и следующий!
+                            for (Button button1:allButtons){
                                 button1.setEnabled(false);
                             }
                             for (int j =0; j < numberOfButtons; j++){  // проверяем остальные кнопки и правильный ответ выделяем зелёным. ИИИ запиешем правильный ответ в очередной массив)
@@ -368,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                             rightAnswerState[getArguments().getInt(ARG_SECTION_NUMBER)] = false;
-                            selectedButtonNum[getArguments().getInt(ARG_SECTION_NUMBER)] = finalI; //  переписать чтобы использовалось один раз вне оператора if
+                            selectedButtonNum[getArguments().getInt(ARG_SECTION_NUMBER)] = finalI;
                         }
                         if (progress > 9) {
                             // Create dialog.
@@ -377,29 +324,30 @@ public class MainActivity extends AppCompatActivity {
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-
-                                    ItemModel itemModel = new ItemModel(userName, score);
-                                    myRef.push().setValue(itemModel);
+                                    if (!userName.equals("")) {
+                                        ItemModel itemModel = new ItemModel(userName, score);
+                                        myRef.push().setValue(itemModel);
+                                    }
+                                    startActivity(intentStart);
                                 }
                             });
                             builder.setNeutralButton("Show table", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    ItemModel itemModel = new ItemModel(userName, score);
-                                    myRef.push().setValue(itemModel);
-
+                                    if (!userName.equals("")) {
+                                        ItemModel itemModel = new ItemModel(userName, score);
+                                        myRef.push().setValue(itemModel);
+                                    }
                                     startActivity(intentRes);
                                 }
                         });
-                            builder.setCancelable(false);
+                            builder.setCancelable(true);
                             builder.show();
                         }
                     }
                 });
             }
-            /**/
 
-            //textView.setText(nRA);
             return rootView;
         }
     }

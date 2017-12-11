@@ -6,12 +6,24 @@
     android:layout_height="match_parent"
     tools:context="com.example.acpro.quiz.MainActivity$PlaceholderFragment">
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingActionButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:clickable="true"
+        android:src="@android:drawable/ic_menu_help"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:focusable="true" />
+
     <TextView
         android:id="@+id/section_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:text="text"
+        android:text="@string/tv_hide"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -21,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="1"
+        android:text="@string/B_1"
         app:layout_constraintBottom_toTopOf="@+id/button3"
         app:layout_constraintEnd_toStartOf="@+id/button2"
         app:layout_constraintHorizontal_bias="0.5"
@@ -34,7 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="2"
+        android:text="@string/B_2"
         app:layout_constraintBottom_toBottomOf="@+id/button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -48,7 +60,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="3"
+        android:text="@string/B_3"
         app:layout_constraintBottom_toTopOf="@+id/button11"
         app:layout_constraintEnd_toStartOf="@+id/button4"
         app:layout_constraintHorizontal_bias="0.5"
@@ -60,7 +72,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="4"
+        android:text="@string/_4"
         app:layout_constraintBottom_toBottomOf="@+id/button3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -89,7 +101,8 @@
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textView" />
+        app:layout_constraintTop_toTopOf="@+id/textView"
+        android:contentDescription="@string/todo" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
@@ -105,7 +118,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="5"
+        android:text="@string/B_5"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button12"
         app:layout_constraintHorizontal_bias="0.5"
@@ -117,7 +130,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="6"
+        android:text="@string/B_6"
         app:layout_constraintBottom_toBottomOf="@+id/button11"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

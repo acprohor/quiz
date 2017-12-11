@@ -24,6 +24,7 @@ import com.google.firebase.database.Query;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ResultsActivity extends AppCompatActivity {
@@ -58,30 +59,20 @@ public class ResultsActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("items");
 
-        String testMas[] = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"};
-
         final ListView listView = findViewById(R.id.lvData);
         final TextView textView = findViewById(R.id.textView3);
-
-        //List<String> items = initData();
-
-        //final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.list_item, items);
 
         final ItemModelAdapter adapter = new ItemModelAdapter(this, initData());
         listView.setAdapter(adapter);
 
-        Query getLeaderList = myRef.orderByChild("score");
+        Query getLeaderList = myRef.orderByChild("score").limitToLast(20);
         getLeaderList.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                /*Item item = dataSnapshot.getValue(Item.class);
-                textView.setText(item.name);
-                adapter.add(item);*/
                 list.add(dataSnapshot.getValue(ItemModel.class));
+                Collections.sort(list, Collections.reverseOrder(ItemModel.COMPARE_BY_SCORE));
 
                 listView.setAdapter(adapter);
-
-                //adapter.add(itemModel);
             }
 
             @Override
@@ -105,27 +96,7 @@ public class ResultsActivity extends AppCompatActivity {
             }
         });
 
-        Button buttonShowTable = findViewById(R.id.button7);
-        Button buttonDeleteTable = findViewById(R.id.button6);
         Button buttonPlayAgain = findViewById(R.id.button8);
-
-
-
-
-
-        buttonShowTable.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                
-            }
-        });
-
-        buttonDeleteTable.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
 
         buttonPlayAgain.setOnClickListener(new View.OnClickListener() {
             @Override

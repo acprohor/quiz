@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="@drawable/wallpaper_main"
     tools:context="com.example.acpro.quiz.MainActivity"
     tools:layout_editor_absoluteY="25dp">
 
@@ -24,61 +25,61 @@
             android:id="@+id/tabItem1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1" />
+            android:text="@string/tabNum_1" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="2" />
+            android:text="@string/tabNum_2" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="3" />
+            android:text="@string/tabNum_3" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="4" />
+            android:text="@string/tabNum_4" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="5" />
+            android:text="@string/tabNum_5" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="6" />
+            android:text="@string/tabNum_6" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="7" />
+            android:text="@string/tabNum_7" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="8" />
+            android:text="@string/tabNum_8" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem9"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="9" />
+            android:text="@string/tabNum_9" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="10" />
+            android:text="@string/tabNum_10" />
     </android.support.design.widget.TabLayout>
 
     <android.support.v4.view.ViewPager
